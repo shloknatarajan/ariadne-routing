@@ -94,7 +94,7 @@ sentence = "This is a sample sentence."
 vector = embed_sentence(sentence)
 print(vector.shape)  # Output: (768,)
 
-if __name__ == "__main__":
+def main():
     test_sentences = [
         "The cat sits on the mat",
         "The cat sits on the bed",
@@ -106,5 +106,6 @@ if __name__ == "__main__":
     ]
     
     clusters = cluster_sentences(test_sentences, show_graph=False)
-    for cluster_id in clusters:
-        print(clusters[cluster_id][-1])
+    return clusters 
+
+
