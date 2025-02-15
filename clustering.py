@@ -5,19 +5,20 @@ import numpy as np
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 
-def embed_sentence(sentence: str, model_name: str = "bert-base-nli-mean-tokens"):
+def embed_sentence(sentences: str | List[str], model_name: str = "paraphrase-MiniLM-L3-v2", batch_size: int = 32):
     """
-    Embeds a sentence using a BERT-based model from Hugging Face's Sentence-Transformers.
+    Embeds one or more sentences using a BERT-based model from Hugging Face's Sentence-Transformers.
     
-    :param sentence: The input sentence to be embedded.
-    :param model_name: The name of the pre-trained model to use (default: "bert-base-nli-mean-tokens").
-    :return: A vector embedding (numpy array) of the sentence.
+    :param sentences: Single sentence or list of sentences to be embedded
+    :param model_name: The name of the pre-trained model to use
+    :param batch_size: Batch size for processing multiple sentences
+    :return: A vector embedding or array of embeddings
     """
     model = SentenceTransformer(model_name)
-    embedding = model.encode(sentence)
-    return embedding
+    embeddings = model.encode(sentences, batch_size=batch_size)
+    return embeddings
 
-def cluster_sentences(sentences: List[str], n_clusters: int = 5, model_name: str = "bert-base-nli-mean-tokens", show_graph: bool = False) -> Dict[int, List[str]]:
+def cluster_sentences(sentences: List[str], n_clusters: int = 5, model_name: str = "paraphrase-MiniLM-L3-v2", show_graph: bool = False) -> Dict[int, List[str]]:
     """
     Clusters sentences using their embeddings and K-Means clustering.
     Automatically determines optimal number of clusters using elbow method.
@@ -28,8 +29,8 @@ def cluster_sentences(sentences: List[str], n_clusters: int = 5, model_name: str
     :param show_graph: If True, displays a 2D visualization of the clusters (default: False)
     :return: Dictionary mapping cluster IDs to lists of sentences
     """
-    # Create embeddings for all sentences
-    embeddings = np.array([embed_sentence(sent, model_name) for sent in sentences])
+    # Create embeddings for all sentences in one batch
+    embeddings = np.array(embed_sentence(sentences, model_name))
     
     # Find optimal number of clusters using elbow method
     inertias = []
