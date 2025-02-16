@@ -33,17 +33,16 @@ def chat():
         predicted_agent = new_router.inference(message)
         
         def generate():
-            # First response - prediction
+            # Each response needs to be properly formatted and end with a newline
             yield json.dumps({
                 "type": "prediction",
                 "content": f"The agent to use is {predicted_agent}"
-            }) + '\n'
+            }).strip() + '\n'
             
-            # Second response - running status
             yield json.dumps({
                 "type": "status",
                 "content": f"Running {predicted_agent} agent..."
-            }) + '\n'
+            }).strip() + '\n'
             
             # Run the agent
             result = run_agent(predicted_agent, message)
@@ -53,12 +52,12 @@ def chat():
                 yield json.dumps({
                     "type": "result",
                     "content": result.raw
-                }) + '\n'
+                }).strip() + '\n'
             else:
                 yield json.dumps({
                     "type": "result",
                     "content": "agent is done running."
-                }) + '\n'
+                }).strip() + '\n'
 
         return Response(generate(), mimetype='application/x-ndjson')
     except Exception as e:

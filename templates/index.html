@@ -340,7 +340,7 @@
           } catch (error) {
             console.error('Error:', error);
             hideTypingIndicator();
-            addMessage('Sorry, there was an error processing your message.');
+            addMessage(`Sorry, there was an error processing your message. ${error}`);
           }
         }
       }
