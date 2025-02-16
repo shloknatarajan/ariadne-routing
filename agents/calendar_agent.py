@@ -54,7 +54,7 @@ def prompt_calendar(prompt):
         llm=ChatOpenAI(model="gpt-4o"),
     )
     task = Task(
-        description="USE THE GIVEN TOOLS. Complete the following calendar-related task properly. " + prompt,
+        description="USE THE GIVEN TOOLS. Complete the following calendar-related task properly. (fyi my name is Advay) " + prompt,
         agent=crewai_agent,
         expected_output=""
     )

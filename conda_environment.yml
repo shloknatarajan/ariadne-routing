@@ -215,7 +215,7 @@ dependencies:
       - tomli==2.2.1
       - tomli-w==1.2.0
       - torch==2.6.0
-      - tqdm==4.67.1
+      - traitlets==5.14.3
       - transformers==4.48.3
       - typer==0.15.1
       - types-requests==2.32.0.20241016
