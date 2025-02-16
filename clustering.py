@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 
-def embed_sentence(sentences: str | List[str], model_name: str = "paraphrase-MiniLM-L3-v2", batch_size: int = 32):
+def embed_sentence(sentences: str | List[str], model_name: str = "bert-base-nli-mean-tokens", batch_size: int = 32):
     """
     Embeds one or more sentences using a BERT-based model from Hugging Face's Sentence-Transformers.
     
@@ -15,10 +15,10 @@ def embed_sentence(sentences: str | List[str], model_name: str = "paraphrase-Min
     :return: A vector embedding or array of embeddings
     """
     model = SentenceTransformer(model_name)
-    embeddings = model.encode(sentences, batch_size=batch_size)
+    embeddings = model.encode(sentences, batch_size=batch_size, show_progress_bar=True)
     return embeddings
 
-def cluster_sentences(sentences: List[str], n_clusters: int = 5, model_name: str = "paraphrase-MiniLM-L3-v2", show_graph: bool = False) -> Dict[int, List[str]]:
+def cluster_sentences(sentences: List[str], n_clusters: int = 5, model_name: str = "bert-base-nli-mean-tokens", show_graph: bool = False) -> Dict[int, List[str]]:
     """
     Clusters sentences using their embeddings and K-Means clustering.
     Automatically determines optimal number of clusters using elbow method.
@@ -34,28 +34,28 @@ def cluster_sentences(sentences: List[str], n_clusters: int = 5, model_name: str
     
     # Find optimal number of clusters using elbow method
     inertias = []
-    K = range(1, min(n_clusters + 1, len(sentences)))
+    # K = range(1, min(n_clusters + 1, len(sentences)))
     
-    for k in K:
-        kmeans = KMeans(n_clusters=k, random_state=42)
-        kmeans.fit(embeddings)
-        inertias.append(kmeans.inertia_)
+    # for k in K:
+    #     kmeans = KMeans(n_clusters=k, random_state=42)
+    #     kmeans.fit(embeddings)
+    #     inertias.append(kmeans.inertia_)
     
-    # Calculate the rate of change in inertia
-    elbow_point = 1  # Default to 1 cluster if no clear elbow
-    if len(K) > 2:
-        changes = np.diff(inertias)
-        # Find point where the rate of improvement slows down significantly
-        threshold = np.mean(np.abs(changes)) * 0.5  # Adjust threshold as needed
-        for i, change in enumerate(changes):
-            if abs(change) < threshold:
-                elbow_point = i + 1
-                break
+    # # Calculate the rate of change in inertia
+    # elbow_point = 1  # Default to 1 cluster if no clear elbow
+    # if len(K) > 2:
+    #     changes = np.diff(inertias)
+    #     # Find point where the rate of improvement slows down significantly
+    #     threshold = np.mean(np.abs(changes)) * 0.5  # Adjust threshold as needed
+    #     for i, change in enumerate(changes):
+    #         if abs(change) < threshold:
+    #             elbow_point = i + 1
+    #             break
     
-    optimal_clusters = min(elbow_point, n_clusters)
-    
+    # optimal_clusters = min(elbow_point, n_clusters)
+    optimal_clusters = n_clusters
     # Perform K-means clustering with optimal number of clusters
-    kmeans = KMeans(n_clusters=optimal_clusters, random_state=42)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     cluster_labels = kmeans.fit_predict(embeddings)
     
     # If show_graph is True, create and display the visualization

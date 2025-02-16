@@ -98,16 +98,17 @@ def inference(cluster_vector, agent_vectors, temperature=0.1):
     return probs.numpy()
 
 
-clusters = main()
-agents = [i for i in range(3)]
-# Example usage
-cluster_vectors, agent_vectors = initialize(clusters, agents)
-trained_cluster_vectors, trained_agent_vectors = learn_embeddings(
-    cluster_vectors, 
-    agent_vectors,  
-    ground_truth
-)
+if __name__ == '__main__':
+    clusters = main()
+    agents = [i for i in range(3)]
+    # Example usage
+    cluster_vectors, agent_vectors = initialize(clusters, agents)
+    trained_cluster_vectors, trained_agent_vectors = learn_embeddings(
+        cluster_vectors, 
+        agent_vectors,  
+        ground_truth
+    )
 
-# For inference
-probs = inference(trained_cluster_vectors[0], trained_agent_vectors)
+    # For inference
+    probs = inference(trained_cluster_vectors[0], trained_agent_vectors)
 
