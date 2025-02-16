@@ -280,15 +280,6 @@
       const chatBody = document.getElementById('chat-body');
       const typingIndicator = document.getElementById('typing-indicator');
       
-      // Bot responses with varying response times
-      const botResponses = [
-        {text: "I'm here to assist you with any questions you might have.", time: 1500},
-        {text: "That's an interesting question! Let me think about it...", time: 2500},
-        {text: "I can help you with a wide range of topics including weather, general knowledge, and more!", time: 1800},
-        {text: "Is there anything specific you'd like to know about?", time: 1200},
-        {text: "I'm designed to be helpful, harmless, and honest in all my interactions.", time: 2000}
-      ];
-      
       // Function to add a new message to the chat
       function addMessage(content, isUser = false) {
         const messageDiv = document.createElement('div');
@@ -320,7 +311,7 @@
       }
       
       // Function to handle sending a message
-      function sendMessage() {
+      async function sendMessage() {
         const message = messageInput.value.trim();
         if (message) {
           // Add user message
@@ -330,14 +321,23 @@
           // Show typing indicator
           showTypingIndicator();
           
-          // Get random bot response
-          const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
-          
-          // Simulate bot thinking and typing
-          setTimeout(() => {
+          try {
+            const response = await fetch('http://localhost:5000/chat', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ message: message })
+            });
+            
+            const data = await response.json();
             hideTypingIndicator();
-            addMessage(randomResponse.text);
-          }, randomResponse.time);
+            addMessage(data.response);
+          } catch (error) {
+            console.error('Error:', error);
+            hideTypingIndicator();
+            addMessage('Sorry, there was an error processing your message.');
+          }
         }
       }
       
