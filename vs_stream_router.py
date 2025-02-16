@@ -7,9 +7,26 @@ from collections import defaultdict
 import os
 from openai import OpenAI
 from sklearn.neighbors import NearestNeighbors
+from langchain.docstore.document import Document
+from langchain_iris import IRISVector
 
-os.environ['TRUST_REMOTE_CODE'] = '1'
+# A custom embedding function for our clusters.
+# Given a document whose metadata contains the cluster index, return the corresponding cluster center.
+class ClusterCenterEmbeddings:
+    def __init__(self, router):
+        self.router = router
 
+    def embed(self, text: str, metadata: dict = None) -> np.ndarray:
+        """
+        Instead of computing an embedding from the text, we look up the cluster center.
+        We assume that metadata contains the cluster index.
+        """
+        cluster_index = metadata.get("cluster_index")
+        center = self.router.clusters[cluster_index]["center"]
+        # Make sure to return a NumPy array.
+        return center.detach().cpu().numpy()
+
+# In your StreamRouter __init__, add (or create on first use) an IRISVector store for clusters.
 class StreamRouter:
     """
     A streaming router that performs dynamic clustering with a threshold (alpha) and uses
@@ -28,20 +45,14 @@ class StreamRouter:
     """
     
     def __init__(self, agents, embedding_dim=64, learning_rate=0.01, min_samples=5):
-        """
-        agents: list of agent names.
-        alpha: threshold for clustering (no longer used for update logic here).
-        embedding_dim: dimension for both prompt projections and agent embeddings.
-        learning_rate: learning rate used for updating embeddings.
-        min_samples: minimum number of samples needed before training a cluster embedding.
-        """
-        self.agents = agents  # list of agent names
+        # (existing initialization code)
+        self.agents = agents
         self.learning_rate = learning_rate
         self.embedding_dim = embedding_dim
         self.min_samples = min_samples
         self.cap = 10
 
-        # Initialize OpenAI client and embedding model
+        # Initialize OpenAI client and embedding model as before.
         self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         self.embed_model = lambda text: self.client.embeddings.create(
             model="text-embedding-3-small",
@@ -49,22 +60,88 @@ class StreamRouter:
         ).data[0].embedding
 
         # Initialize agent embeddings as learnable parameters.
-        # They are stored in a dictionary mapping agent->nn.Parameter.
         self.agent_embeddings = {
-            agent: nn.Parameter(torch.randn(embedding_dim), requires_grad=True)
+            agent: torch.nn.Parameter(torch.randn(embedding_dim), requires_grad=True)
             for agent in agents
         }
 
-        # This list will store clusters.
-        # Each cluster is a dict with:
-        #   "data": a list of tuples (prompt_embedding, agent)
-        #   "embedding": a torch.nn.Parameter (learned after at least min_samples samples) or None.
-        #   "center": an average embedding of the cluster.
-        #   "count": the number of samples in the cluster.
-        self.clusters = []
+        self.clusters = []  # list of clusters
+
+        # IRIS connection details; adjust these as needed.
+        username = 'demo'
+        password = 'demo'
+        hostname = os.getenv('IRIS_HOSTNAME', 'localhost')
+        port = '1972'
+        namespace = 'USER'
+        self.CONNECTION_STRING = f"iris://{username}:{password}@{hostname}:{port}/{namespace}"
+
+        # We will lazily initialize the IRISVector store for clusters when needed.
+        self.cluster_vector_store = None
+        self.cluster_collection_name = "stream_router_clusters"
+
+    def _update_cluster_vector_store(self):
+        """
+        Re-create (or update) the IRISVector store with the current cluster centers.
+        We convert each cluster into a Document whose text is a dummy value (e.g., "cluster")
+        and whose metadata contains the cluster index.
+        """
+        from langchain.docstore.document import Document
         
+        docs = []
+        for i, cluster in enumerate(self.clusters):
+            docs.append(Document(page_content="cluster", metadata={"cluster_index": i}))
         
+        # Create a custom embedding function that looks up the correct cluster center.
+        cluster_embedding_func = ClusterCenterEmbeddings(self)
+        
+        # Create (or re-create) the IRISVector store for clusters.
+        self.cluster_vector_store = IRISVector.from_documents(
+            documents=docs,
+            embedding=cluster_embedding_func,  # Our custom function
+            collection_name=self.cluster_collection_name,
+            connection_string=self.CONNECTION_STRING,
+        )
+
+    def inference(self, prompt: str) -> str:
+        """
+        Given a prompt, embed it and use IRISVector Search to find the nearest cluster.
+        Then, based on the nearest cluster, select an agent.
+        """
+        # Embed the prompt as before.
+        prompt_emb = self._compute_prompt_embedding(prompt)
+        
+        if not self.clusters:
+            return self.agents[0]  # default if no clusters yet
+        
+        # Make sure our cluster vector store is up-to-date.
+        self._update_cluster_vector_store()
+        
+        # Because IRISVector expects a text query and will use the embedding function provided
+        # (which in our case ignores the text and uses the stored cluster center), we pass the prompt.
+        # (If desired, you could also write a custom method that accepts a vector directly.)
+        docs_with_score = self.cluster_vector_store.similarity_search_with_score(prompt, k=1)
+        
+        # Retrieve the cluster index from the returned document.
+        nearest_cluster_index = docs_with_score[0][0].metadata["cluster_index"]
+        nearest_cluster = self.clusters[nearest_cluster_index]
+        
+        # (Now do the rest as before: if the cluster is trained, choose the nearest agent embedding.)
+        if nearest_cluster["embedding"] is not None:
+            # Instead of computing the distances manually, you could similarly maintain an IRISVector store for agents.
+            # For brevity, we keep this step in memory.
+            agent_embs = torch.stack([self.agent_embeddings[a] for a in self.agents])
+            distances = torch.norm(agent_embs - nearest_cluster["embedding"], dim=1)
+            predicted_agent = self.agents[torch.argmin(distances).item()]
+        else:
+            # Use most common agent if no trained cluster embedding.
+            agent_counts = {}
+            for _, agent in nearest_cluster["data"]:
+                agent_counts[agent] = agent_counts.get(agent, 0) + 1
+            predicted_agent = max(agent_counts.items(), key=lambda x: x[1])[0]
+        
+        return predicted_agent
     
+
     def _compute_prompt_embedding(self, prompt: str) -> torch.Tensor:
         """
         Uses the sentence transformer model to encode the prompt and returns a torch tensor.
@@ -246,53 +323,6 @@ class StreamRouter:
             elif len(nearest_cluster["data"]) > self.min_samples:
                 self._training_update(nearest_cluster, new_data=(prompt_emb, agent))
 
-    def inference(self, prompt: str) -> str:
-        """
-        Given a prompt, embeds it and checks for a trained cluster within alpha.
-        
-        Uses nearest neighbors search to find closest cluster center. If within alpha threshold,
-        returns agent prediction from that cluster. Otherwise falls back to default.
-        """
-        # Embed the prompt
-        prompt_emb = self._compute_prompt_embedding(prompt)
-        
-        # If no clusters exist yet, return default agent
-        if not self.clusters:
-            return self.agents[0]
-            
-        # Prepare candidate embeddings matrix for KNN search
-        candidate_matrix = []
-        for cluster in self.clusters:
-            emb = cluster["center"]
-            if isinstance(emb, torch.Tensor):
-                emb_np = emb.detach().cpu().numpy()
-            else:
-                emb_np = np.array(emb)
-            candidate_matrix.append(emb_np)
-        candidate_matrix = np.stack(candidate_matrix)
-
-        # Find nearest cluster
-        nbrs = NearestNeighbors(n_neighbors=1).fit(candidate_matrix)
-        query_vector = prompt_emb.detach().cpu().numpy().reshape(1, -1)
-        distances, indices = nbrs.kneighbors(query_vector)
-        
-        nearest_cluster = self.clusters[indices[0][0]]
-        
-        if nearest_cluster["embedding"] is not None:
-            # Use nearest neighbor to find closest agent embedding
-            #using an embedding rather than a count allows us to account for new agents or removed agents
-            agent_embeddings = torch.stack([self.agent_embeddings[a] for a in self.agents])
-            distances = torch.norm(agent_embeddings - nearest_cluster["embedding"], dim=1)
-            predicted_agent = self.agents[torch.argmin(distances).item()]
-        else:
-            # Get the most common agent in this cluster
-            agent_counts = {}
-            for _, agent in nearest_cluster["data"]:
-                agent_counts[agent] = agent_counts.get(agent, 0) + 1
-            predicted_agent = max(agent_counts.items(), key=lambda x: x[1])[0]
-        
-        return predicted_agent
-    
     def debug_clusters(self):
         """
         Debug method to print current clusters and their contents.
@@ -348,26 +378,3 @@ class StreamRouter:
             # If we have enough samples, train the cluster embedding
             if len(example_prompts) >= self.min_samples:
                 self._training_update(new_cluster)
-
-if __name__ == "__main__":
-    # Import training updates and test prompts from the external file.
-    from ideation import TRAIN_UPDATES, TEST_PROMPTS
-
-    # Create a router instance with desired parameters.
-    agents = ["HR Agent", "Code Generation Agent","Web Search Agent", "Customer Service Agent", "Database Agent"]
-    router = StreamRouter(agents,  embedding_dim=64, learning_rate=0.1)
-    
-    # Process training updates (each prompt is paired with an agent, but we ignore the provided agent).
-    for prompt, agent in TRAIN_UPDATES:
-        router.update(prompt, agent)
-    print(f"Total clusters formed after training update: {len(router.clusters)}")
-    
-    # Debug: Print cluster details.
-    router.debug_clusters()
-    
-    # Execute test inferences using the imported test prompts.
-    print("\nTest Inference Results:")
-    for i, prompt in enumerate(TEST_PROMPTS, start=1):
-        predicted_agent = router.inference(prompt)
-        print(f"\nTest Prompt {i}: \"{prompt}\"")
-        print(f"Predicted Agent: {predicted_agent}")
