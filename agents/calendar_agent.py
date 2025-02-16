@@ -12,14 +12,14 @@ def prompt_calendar(prompt):
         role="Knowledge Base Agent",
         goal="""You are an AI agent that is responsible for the company knowledge base. You have all knowledge of the company details. If you don't know something, make it up.""",
         backstory=(
-        """You work for Conductor AI. 
-        Conductor AI - The Future of Intelligent Agent Management
+        """You work for VLY AI. 
+        VLY AI - The Future of Intelligent Agent Management
 
-    Conductor AI is a next-generation software platform designed to help businesses optimize their agent management by ensuring the right agents are assigned to the right tasks at the right time. Whether for customer support, sales, IT service desks, or other agent-driven operations, Conductor AI leverages advanced artificial intelligence to dynamically orchestrate agent workflows, enhance productivity, and improve overall business efficiency.
+    VLY AI is a next-generation software platform designed to help businesses optimize their agent management by ensuring the right agents are assigned to the right tasks at the right time. Whether for customer support, sales, IT service desks, or other agent-driven operations, Conductor AI leverages advanced artificial intelligence to dynamically orchestrate agent workflows, enhance productivity, and improve overall business efficiency.
 
     Company Overview
     Founded: 2021
-    Founders: Advay Goel, Devan Shah, Victor Cheng
+    Founders: Advay Goel, Devan Shah, Victor Cheng, Shlok Natarajan
     Headquarters: San Francisco, CA
     Mission Statement: Empower businesses with intelligent agent management, ensuring efficiency, precision, and scalability in every interaction.
     Industry: AI-driven workforce management and automation
@@ -54,7 +54,7 @@ def prompt_calendar(prompt):
         llm=ChatOpenAI(model="gpt-4o"),
     )
     task = Task(
-        description="USE THE GIVEN TOOLS. Complete the following calendar-related task properly. " + prompt,
+        description="USE THE GIVEN TOOLS. Complete the following calendar-related task properly. (fyi my name is Advay) " + prompt,
         agent=crewai_agent,
         expected_output=""
     )
@@ -64,4 +64,4 @@ def prompt_calendar(prompt):
     result = my_crew.kickoff()
     return result 
 
-print(prompt_calendar("You are trying to hire shlok.natarajan@gmail.com. Schedule an interview with him for 2/18 at 12pm PST via google meet and write a good message about our company that will make him incentivized to join!"))
+print(prompt_calendar("You are trying to hire agupta42@stanford.edu. Schedule an interview with him for 2/18 at 12pm PST via google meet and write a good message about our company that will make him incentivized to join!"))
