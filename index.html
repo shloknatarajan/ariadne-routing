@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animated Chat Interface</title>
+  <style>
+    :root {
+      --primary-color: #1a1a1a;
+      --secondary-color: #f0f2ff;
+      --text-color: #333;
+      --light-grey: #eee;
+      --dark-grey: #888;
+      --white: #fff;
+      --shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f7f9fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .chat-container {
+      width: 100%;
+      max-width: 800px;
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      overflow: hidden;
+    }
+    
+    .chat-header {
+      background: var(--primary-color);
+      color: var(--white);
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .bot-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--white);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 10px;
+      overflow: hidden;
+    }
+    
+    .bot-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .chat-title {
+      flex: 1;
+    }
+    
+    .chat-title h1 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .chat-title p {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    
+    .chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message {
+      max-width: 80%;
+      margin-bottom: 15px;
+      position: relative;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.3s forwards;
+    }
+    
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .message-content {
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    
+    .message.user {
+      align-self: flex-end;
+    }
+    
+    .message.user .message-content {
+      background: var(--primary-color);
+      color: var(--white);
+      border-bottom-right-radius: 4px;
+    }
+    
+    .message.bot {
+      align-self: flex-start;
+    }
+    
+    .message.bot .message-content {
+      background: var(--secondary-color);
+      color: var(--text-color);
+      border-bottom-left-radius: 4px;
+    }
+    
+    .typing-indicator {
+      display: none;
+      align-self: flex-start;
+      background: var(--light-grey);
+      padding: 12px 16px;
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      margin-bottom: 15px;
+    }
+    
+    .typing-dots {
+      display: flex;
+      align-items: center;
+    }
+    
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--dark-grey);
+      border-radius: 50%;
+      margin-right: 4px;
+      animation: bounce 1.5s infinite;
+      opacity: 0.6;
+    }
+    
+    .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .dot:nth-child(3) {
+      animation-delay: 0.4s;
+      margin-right: 0;
+    }
+    
+    @keyframes bounce {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-4px);
+      }
+    }
+    
+    .chat-footer {
+      padding: 15px;
+      border-top: 1px solid var(--light-grey);
+      display: flex;
+      align-items: center;
+    }
+    
+    .message-input {
+      flex: 1;
+      border: none;
+      background: var(--light-grey);
+      border-radius: 24px;
+      padding: 12px 15px;
+      font-size: 14px;
+      outline: none;
+      transition: background 0.3s;
+    }
+    
+    .message-input:focus {
+      background: var(--white);
+      box-shadow: 0 0 0 2px var(--primary-color);
+    }
+    
+    .send-button {
+      background: var(--primary-color);
+      color: var(--white);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-left: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+      outline: none;
+    }
+    
+    .send-button:hover {
+      background: #5566e0;
+    }
+    
+    .send-button:active {
+      transform: scale(0.95);
+    }
+    
+    /* Placeholder image for avatar - replace this with appropriate robot icon */
+    .bot-icon {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="bot-avatar">
+        <svg class="bot-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9v7.5c0 1.38 1.12 2.5 2.5 2.5H11v-2H7.5v-8c0-2.48 2.02-4.5 4.5-4.5s4.5 2.02 4.5 4.5v8H13v2h3.5c1.38 0 2.5-1.12 2.5-2.5V9c0-3.87-3.13-7-7-7z" fill="#1a1a1a"/>
+          <path d="M14 15.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-6 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" fill="#1a1a1a"/>
+          <path d="M17 2v3h2V2h-2zm-3 0v3h2V2h-2zm-3 0v3h2V2h-2zm-3 0v3h2V2H8z" fill="#1a1a1a"/>
+        </svg>
+      </div>
+      <div class="chat-title">
+        <h1>Conductor</h1>
+        <p>Online</p>
+      </div>
+    </div>
+    
+    <div class="chat-body" id="chat-body">
+      <div class="message bot">
+        <div class="message-content">
+          Hi there! 👋 I'm your friendly chat assistant. How can I help you today?
+        </div>
+      </div>
+      
+      <div class="typing-indicator" id="typing-indicator">
+        <div class="typing-dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="chat-footer">
+      <input type="text" class="message-input" id="message-input" placeholder="Type a message..." autocomplete="off">
+      <button class="send-button" id="send-button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="white"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const messageInput = document.getElementById('message-input');
+      const sendButton = document.getElementById('send-button');
+      const chatBody = document.getElementById('chat-body');
+      const typingIndicator = document.getElementById('typing-indicator');
+      
+      // Bot responses with varying response times
+      const botResponses = [
+        {text: "I'm here to assist you with any questions you might have.", time: 1500},
+        {text: "That's an interesting question! Let me think about it...", time: 2500},
+        {text: "I can help you with a wide range of topics including weather, general knowledge, and more!", time: 1800},
+        {text: "Is there anything specific you'd like to know about?", time: 1200},
+        {text: "I'm designed to be helpful, harmless, and honest in all my interactions.", time: 2000}
+      ];
+      
+      // Function to add a new message to the chat
+      function addMessage(content, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        messageDiv.classList.add(isUser ? 'user' : 'bot');
+        
+        const messageContent = document.createElement('div');
+        messageContent.classList.add('message-content');
+        messageContent.textContent = content;
+        
+        messageDiv.appendChild(messageContent);
+        chatBody.insertBefore(messageDiv, typingIndicator);
+        
+        // Scroll to bottom of chat
+        chatBody.scrollTop = chatBody.scrollHeight;
+        
+        return messageDiv;
+      }
+      
+      // Function to show typing indicator
+      function showTypingIndicator() {
+        typingIndicator.style.display = 'block';
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }
+      
+      // Function to hide typing indicator
+      function hideTypingIndicator() {
+        typingIndicator.style.display = 'none';
+      }
+      
+      // Function to handle sending a message
+      function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+          // Add user message
+          addMessage(message, true);
+          messageInput.value = '';
+          
+          // Show typing indicator
+          showTypingIndicator();
+          
+          // Get random bot response
+          const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
+          
+          // Simulate bot thinking and typing
+          setTimeout(() => {
+            hideTypingIndicator();
+            addMessage(randomResponse.text);
+          }, randomResponse.time);
+        }
+      }
+      
+      // Event listeners
+      sendButton.addEventListener('click', sendMessage);
+      
+      messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          sendMessage();
+        }
+      });
+      
+      // Focus input field when page loads
+      messageInput.focus();
+    });
+  </script>
+</body>
+</html>
