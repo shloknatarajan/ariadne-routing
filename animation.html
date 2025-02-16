@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LLM Routing Animation</title>
+  <style>
+    body {
+      margin: 0;
+      background: #121212;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    svg {
+      overflow: visible;
+    }
+    /* Common styles for smooth transitions */
+    .anim {
+      transition: all 0.5s ease-out;
+      opacity: 0;
+    }
+    /* Initially visible prompt */
+    #prompt {
+      font-family: sans-serif;
+      font-size: 24px;
+      fill: #FFFFFF;
+      opacity: 1;
+    }
+    /* Agent initially hidden */
+    #agent {
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+  <svg width="800" height="200">
+    <!-- Step 1: Prompt text -->
+    <text id="prompt" x="50" y="100">Enter your prompt</text>
+    
+    <!-- Step 2: Vector (an arrow) – initially hidden -->
+    <polygon id="vector" class="anim" 
+      points="150,95 150,105 170,100" 
+      fill="#00FFAA" transform="translate(0,0)" />
+    
+    <!-- Step 3: Cluster (a group of 3 circles) – initially hidden -->
+    <g id="cluster" class="anim" transform="translate(170,100)">
+      <circle cx="0" cy="0" r="5" fill="#FFAA00"/>
+      <circle cx="10" cy="0" r="5" fill="#FFAA00"/>
+      <circle cx="5" cy="8" r="5" fill="#FFAA00"/>
+    </g>
+    
+    <!-- Step 4: Agent icon (a circle to represent an agent) – initially hidden -->
+    <circle id="agent" cx="600" cy="100" r="20" fill="#FF55AA"/>
+  </svg>
+
+  <script>
+    // A simple sequence using setTimeout to trigger each stage.
+    const promptEl = document.getElementById('prompt');
+    const vectorEl = document.getElementById('vector');
+    const clusterEl = document.getElementById('cluster');
+    const agentEl = document.getElementById('agent');
+
+    // Stage timings (in milliseconds)
+    const stageDelay = 1000;
+
+    // Stage 2: Fade out prompt, fade in vector
+    setTimeout(() => {
+      promptEl.style.transition = "opacity 0.5s";
+      promptEl.style.opacity = 0;
+      vectorEl.style.opacity = 1;
+    }, stageDelay);
+
+    // Stage 3: Move vector toward the cluster and show cluster
+    setTimeout(() => {
+      vectorEl.style.transition = "transform 1s ease-out";
+      // Move the vector a bit right (simulate transformation)
+      vectorEl.setAttribute("transform", "translate(20, 0)");
+      clusterEl.style.opacity = 1;
+    }, stageDelay * 2);
+
+    // Stage 4: "Jump" the cluster (and vector) to a new location
+    setTimeout(() => {
+      // Add a jump effect by first moving upward then later settling down
+      clusterEl.style.transition = "transform 0.5s ease-out";
+      vectorEl.style.transition = "transform 0.5s ease-out";
+      clusterEl.setAttribute("transform", "translate(220, -50)");
+      vectorEl.setAttribute("transform", "translate(220, -50)");
+    }, stageDelay * 3);
+
+    // Stage 5: Settle the cluster by moving to align with the agent and fade in the agent
+    setTimeout(() => {
+      clusterEl.style.transition = "transform 0.5s ease-out";
+      vectorEl.style.transition = "transform 0.5s ease-out";
+      // Move cluster and vector to align with agent (positioned near x=600)
+      clusterEl.setAttribute("transform", "translate(430, 0)");
+      vectorEl.setAttribute("transform", "translate(430, 0)");
+      // Fade in the agent icon
+      agentEl.style.transition = "opacity 0.5s";
+      agentEl.style.opacity = 1;
+    }, stageDelay * 4);
+  </script>
+</body>
+</html>
