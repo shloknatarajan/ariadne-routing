@@ -26,7 +26,7 @@ def chat():
             state['agents'],
             embedding_dim=state['embedding_dim'],
             learning_rate=state['learning_rate'],
-            min_samples=state['min_samples']
+            min_samples=20
         )
         new_router.clusters = state['clusters']
         new_router.agent_embeddings = state['agent_embeddings']
@@ -52,7 +52,7 @@ def chat():
                 # Run the agent
                 # If first and second agent have similar probabilities, run planning agent
                 # Cuttoff number thats agent probability that's 0.04 less than the highest probability
-                threshold = 0.045
+                threshold = 0.04
                 cutoff = agent_probabilities[0][1] - threshold
                 if len(agent_probabilities) > 1 and agent_probabilities[0][1] - agent_probabilities[1][1] < threshold:
                     result = run_planning_agent([agent_probabilities[x][0] for x in range(len(agent_probabilities)) if agent_probabilities[x][1] > cutoff], message)

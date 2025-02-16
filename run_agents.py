@@ -61,7 +61,7 @@ def run_planning_agent(agents, prompt):
         plan = []
         
         # Basic parsing of the prompt to create steps
-        words = prompt.lower().split()
+        words = planning_prompt.lower().split()
         for agent_name in agents:
             if agent_name.lower() in words:
                 plan.append(f"{agent_name}: Process input related to {agent_name}")
@@ -90,7 +90,7 @@ def run_planning_agent(agents, prompt):
                 # Execute the agent with the original prompt
                 # In a more sophisticated implementation, we might parse specific
                 # instructions for each agent from the step description
-                result = agent_func(prompt)
+                result = agent_func(agent_name, prompt)
                 
                 results.append({
                     'step': step,
@@ -135,7 +135,7 @@ def run_planning_agent(agents, prompt):
             'status': 'success',
             'plan': plan,
             'execution_results': execution_results,
-            'output': final_output
+            'raw': final_output
         }
     except Exception as e:
         return {
