@@ -1,0 +1,29 @@
+employee_id,first_name,last_name,email,phone_number,hire_date,job_title,department_id,manager_id,salary
+101,Alice,Johnson,alice.johnson@xyz.com,555-1234,2021-06-15,Software Engineer,1,201,85000
+102,Bob,Smith,bob.smith@xyz.com,555-5678,2019-08-22,Marketing Manager,2,202,95000
+103,Charlie,Davis,charlie.davis@xyz.com,555-8765,2023-03-10,Data Analyst,3,203,78000
+104,Dana,Lee,dana.lee@xyz.com,555-4321,2020-11-30,HR Specialist,4,204,72000
+105,Ethan,Miller,ethan.miller@xyz.com,555-2345,2018-07-12,Software Engineer,1,201,90000
+106,Fiona,Garcia,fiona.garcia@xyz.com,555-3456,2022-09-05,Product Manager,5,205,105000
+107,George,Lopez,george.lopez@xyz.com,555-4567,2017-04-20,DevOps Engineer,1,201,93000
+108,Hannah,Williams,hannah.williams@xyz.com,555-5679,2023-06-01,UX Designer,5,205,82000
+109,Ian,Moore,ian.moore@xyz.com,555-6789,2016-02-28,Senior Data Scientist,3,203,110000
+110,Julia,Martinez,julia.martinez@xyz.com,555-7890,2020-12-14,Recruiter,4,204,68000
+111,Kevin,Taylor,kevin.taylor@xyz.com,555-8901,2015-05-25,Engineering Manager,1,201,115000
+112,Linda,Anderson,linda.anderson@xyz.com,555-9012,2022-03-18,Marketing Coordinator,2,202,72000
+113,Mike,Hernandez,mike.hernandez@xyz.com,555-0123,2019-10-30,Sales Representative,6,206,75000
+114,Nina,Clark,nina.clark@xyz.com,555-1235,2021-08-22,Customer Support,6,206,67000
+115,Oliver,Scott,oliver.scott@xyz.com,555-2346,2018-06-10,QA Engineer,1,201,88000
+116,Paula,Adams,paula.adams@xyz.com,555-3457,2023-01-25,Business Analyst,5,205,87000
+117,Quincy,Ramirez,quincy.ramirez@xyz.com,555-4568,2016-11-17,Finance Manager,7,207,108000
+118,Rachel,White,rachel.white@xyz.com,555-5670,2017-09-05,HR Manager,4,204,99000
+119,Sam,Baker,sam.baker@xyz.com,555-6781,2020-07-14,Front-End Developer,1,201,86000
+120,Tina,Gonzalez,tina.gonzalez@xyz.com,555-7892,2021-04-22,Back-End Developer,1,201,89000
+121,Uriel,Hall,uriel.hall@xyz.com,555-8903,2019-02-11,IT Support Specialist,8,208,74000
+122,Victor,Young,victor.young@xyz.com,555-9014,2015-12-19,Operations Manager,8,208,112000
+123,Wendy,King,wendy.king@xyz.com,555-0125,2023-08-07,Legal Counsel,9,209,102000
+124,Xander,Parker,xander.parker@xyz.com,555-1236,2022-11-09,Cybersecurity Analyst,8,208,96000
+125,Yasmine,Bennett,yasmine.bennett@xyz.com,555-2347,2016-06-15,Graphic Designer,5,205,83000
+126,Zachary,Carter,zachary.carter@xyz.com,555-3458,2017-05-22,Cloud Engineer,1,201,97000
+127,Alan,Foster,alan.foster@xyz.com,555-4569,2014-03-15,Head of Engineering,1,NULL,135000
+128,Brian,Mitchell,brian.mitchell@xyz.com,555-5671,2013-09-08,Head of DevOps,1,NULL,130000
