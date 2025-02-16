@@ -55,7 +55,7 @@ def cluster_sentences(sentences: List[str], n_clusters: int = 5, model_name: str
     # optimal_clusters = min(elbow_point, n_clusters)
     optimal_clusters = n_clusters
     # Perform K-means clustering with optimal number of clusters
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42, max_iter = 4000, tol = 10e-7)
     cluster_labels = kmeans.fit_predict(embeddings)
     
     # If show_graph is True, create and display the visualization
