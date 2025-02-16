@@ -84,7 +84,7 @@ def learn_embeddings(cluster_vectors, agent_vectors, ground_truth, epochs=100, l
                     vec.div_(vec.norm())
                 cluster_vec.div_(cluster_vec.norm())
             
-        if epoch % 10 == 0:
+        if epoch % (epochs //10) == 0:
             print(f"Epoch {epoch}, Average Loss: {total_loss/len(cluster_vectors):.4f}")
     
     return cluster_vectors, agent_vectors
