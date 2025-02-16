@@ -1,5 +1,10 @@
 from crewai import Agent, Task, Crew
 from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
 
 accounting_agent = Agent(
     role="Accounting Agent",
