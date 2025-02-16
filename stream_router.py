@@ -255,6 +255,8 @@ class StreamRouter:
         """
         # Embed the prompt
         prompt_emb = self._compute_prompt_embedding(prompt)
+
+        print('Prompt Embedding: ', prompt_emb)
         
         # If no clusters exist yet, return default agent
         if not self.clusters:
@@ -272,9 +274,13 @@ class StreamRouter:
         candidate_matrix = np.stack(candidate_matrix)
 
         # Find nearest cluster
-        nbrs = NearestNeighbors(n_neighbors=1).fit(candidate_matrix)
+        nbrs = NearestNeighbors(n_neighbors=3).fit(candidate_matrix)
         query_vector = prompt_emb.detach().cpu().numpy().reshape(1, -1)
         distances, indices = nbrs.kneighbors(query_vector)
+
+        print('Distances to Nearest Clusters: ', distances)
+        print('Indices of Nearest Clusters: ', indices)
+
         
         nearest_cluster = self.clusters[indices[0][0]]
         
@@ -282,14 +288,30 @@ class StreamRouter:
             # Use nearest neighbor to find closest agent embedding
             #using an embedding rather than a count allows us to account for new agents or removed agents
             agent_embeddings = torch.stack([self.agent_embeddings[a] for a in self.agents])
-            distances = torch.norm(agent_embeddings - nearest_cluster["embedding"], dim=1)
+            distances = 1 - F.cosine_similarity(agent_embeddings, nearest_cluster["embedding"].unsqueeze(0))
             predicted_agent = self.agents[torch.argmin(distances).item()]
+
+            # Get distribution over agents using softmax
+            agent_embeddings = torch.stack([self.agent_embeddings[a] for a in self.agents])
+            logits = -distances  # Convert distances to logits (closer = higher probability)
+            probs = F.softmax(logits, dim=0)
+            
+            # Get predicted agent from highest probability
+            predicted_agent = self.agents[torch.argmax(probs).item()]
+            
+            print("Agent Probabilities:", {agent: prob.item() for agent, prob in zip(self.agents, probs)})
+
         else:
             # Get the most common agent in this cluster
             agent_counts = {}
             for _, agent in nearest_cluster["data"]:
                 agent_counts[agent] = agent_counts.get(agent, 0) + 1
             predicted_agent = max(agent_counts.items(), key=lambda x: x[1])[0]
+            
+            # Calculate and print agent probabilities based on counts
+            total_samples = sum(agent_counts.values())
+            agent_probabilities = {agent: count/total_samples for agent, count in agent_counts.items()}
+            print("Agent Probabilities:", agent_probabilities)
         
         return predicted_agent
     

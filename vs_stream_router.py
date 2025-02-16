@@ -9,6 +9,7 @@ from openai import OpenAI
 from sklearn.neighbors import NearestNeighbors
 from langchain.docstore.document import Document
 from langchain_iris import IRISVector
+from mistral_embed import MistralEmbed
 
 # A custom embedding function for our clusters.
 # Given a document whose metadata contains the cluster index, return the corresponding cluster center.
@@ -52,12 +53,10 @@ class StreamRouter:
         self.min_samples = min_samples
         self.cap = 10
 
-        # Initialize OpenAI client and embedding model as before.
-        self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-        self.embed_model = lambda text: self.client.embeddings.create(
-            model="text-embedding-3-small",
-            input=text
-        ).data[0].embedding
+        # Initialize Mistral embedding model
+        from mistral_embed import MistralEmbed
+        self.client = MistralEmbed(api_key=os.getenv('MISTRAL_API_KEY'))
+        self.embed_model = lambda text: self.client.embed_query(text)
 
         # Initialize agent embeddings as learnable parameters.
         self.agent_embeddings = {
