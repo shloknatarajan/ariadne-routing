@@ -1,5 +1,7 @@
 # Routing
+Problem: We want to be able to route a user's query to the best agent based on the query. This solves an increasingly difficult problem as the number of agents grows. This solution is inspired by social media recommendation systems to recommend agents based on the user's query. 
 
+To get started, run `python app.py`
 
 ## Cluster Generation
 1. Take a set of queries
