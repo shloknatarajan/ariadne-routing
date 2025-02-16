@@ -12,4 +12,3 @@ def prompt_perplexity(prompt):
     response = chain.invoke({"input": prompt})
     return response.content
 
-print(prompt_perplexity("Find the latest security vulnerabilities in Python libraries we use."))

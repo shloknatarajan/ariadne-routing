@@ -70,7 +70,7 @@ class CodegenTool:
             
         except Exception as e:
             return f"Error executing code transformation: {str(e)}"
-
+'''
 codegen_tool = CodegenTool()
 
 codegen_agent = Agent(
@@ -95,7 +95,4 @@ task = Task(
     expected_output="Analysis of FastAPI class dependencies"
 )
 
-if __name__ == "__main__":
-    crew = Crew(agents=[codegen_agent], tasks=[task], verbose=True)
-    result = crew.kickoff()
-    print(result)
+'''

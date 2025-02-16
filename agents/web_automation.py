@@ -48,6 +48,7 @@ class WebAutomationTool:
         except Exception as e:
             return f"Error executing web task: {str(e)}"
 
+"""
 web_automation_tool = WebAutomationTool()
 
 web_automation_agent = Agent(
@@ -69,3 +70,4 @@ task = Task(
 crew = Crew(agents=[web_automation_agent], tasks=[task], verbose=True)
 result = crew.kickoff()
 print(result)
+"""

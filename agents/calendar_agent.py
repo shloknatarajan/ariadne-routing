@@ -54,7 +54,7 @@ def prompt_calendar(prompt):
         llm=ChatOpenAI(model="gpt-4o"),
     )
     task = Task(
-        description="USE THE GIVEN TOOLS. Complete the following calendar-related task properly. (fyi my name is Advay) " + prompt,
+        description="USE THE GIVEN TOOLS. Complete the following calendar-related task properly. " + prompt,
         agent=crewai_agent,
         expected_output=""
     )
@@ -63,5 +63,3 @@ def prompt_calendar(prompt):
 
     result = my_crew.kickoff()
     return result 
-
-print(prompt_calendar("You are trying to hire agupta42@stanford.edu. Schedule an interview with him for 2/18 at 12pm PST via google meet and write a good message about our company that will make him incentivized to join!"))
