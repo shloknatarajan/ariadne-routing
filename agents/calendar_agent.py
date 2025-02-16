@@ -34,7 +34,7 @@ def prompt_calendar(prompt):
         ),
         verbose=True,
         allow_delegation=True,
-        llm=ChatOpenAI(),
+        llm=ChatOpenAI(model="gpt-4o"),
     )
 
     # Define agent
@@ -51,7 +51,7 @@ def prompt_calendar(prompt):
         verbose=True,
         tools=tools,
         allow_delegation=True,
-        llm=ChatOpenAI(),
+        llm=ChatOpenAI(model="gpt-4o"),
     )
     task = Task(
         description="USE THE GIVEN TOOLS. Complete the following calendar-related task properly. " + prompt,
@@ -64,4 +64,4 @@ def prompt_calendar(prompt):
     result = my_crew.kickoff()
     return result 
 
-print(prompt_calendar("Make a gcal meeting with advayg@mit.edu. Send a google meet. Schedule for 2/18 at 1pm PST."))
+print(prompt_calendar("You are trying to hire shlok.natarajan@gmail.com. Schedule an interview with him for 2/18 at 12pm PST via google meet and write a good message about our company that will make him incentivized to join!"))
