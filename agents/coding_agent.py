@@ -7,12 +7,12 @@ def prompt_coding(prompt):
     load_dotenv()
 
     coding_agent = Agent(
-        role="Coding Agent",
+        role="Coding and Math Agent",
         goal="Solve coding, math, or software engineering problems",
         backstory="Skilled in software engineering and computer science with experience across many codebases.",
         verbose=True,
         allow_delegation=False,
-        llm=ChatOpenAI(),
+        llm=ChatOpenAI(model="gpt-4o"),
     )
 
     task = Task(

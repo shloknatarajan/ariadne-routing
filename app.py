@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, Response
 from flask_cors import CORS
-from run_agents import run_agent
+from run_agents import run_agent, run_planning_agent
 import json
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  # Enable CORS for all routes
@@ -30,8 +30,11 @@ def chat():
         )
         new_router.clusters = state['clusters']
         new_router.agent_embeddings = state['agent_embeddings']
-        predicted_agent = new_router.inference(message)
-        
+        predicted_agent, agent_probabilities = new_router.inference(message)
+        agent_probabilities = sorted(agent_probabilities.items(), key=lambda x: x[1], reverse=True)
+        print('predicted_agent: ', predicted_agent)
+        print('agent_probabilities: ', agent_probabilities)
+
         def generate():
             try:
                 # First message - prediction
@@ -47,7 +50,14 @@ def chat():
                 }, ensure_ascii=False).strip() + '\n'
                 
                 # Run the agent
-                result = run_agent(predicted_agent, message)
+                # If first and second agent have similar probabilities, run planning agent
+                # Cuttoff number thats agent probability that's 0.04 less than the highest probability
+                threshold = 0.20
+                cutoff = agent_probabilities[0][1] - threshold
+                if len(agent_probabilities) > 1 and agent_probabilities[0][1] - agent_probabilities[1][1] < threshold:
+                    result = run_planning_agent([agent_probabilities[x][0] for x in range(len(agent_probabilities)) if agent_probabilities[x][1] > cutoff], message)
+                else:
+                    result = run_agent(predicted_agent, message)
                 
                 # Ensure result is JSON-safe
                 try:

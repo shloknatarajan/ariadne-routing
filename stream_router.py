@@ -298,8 +298,8 @@ class StreamRouter:
             
             # Get predicted agent from highest probability
             predicted_agent = self.agents[torch.argmax(probs).item()]
-            
-            print("Agent Probabilities:", {agent: prob.item() for agent, prob in zip(self.agents, probs)})
+            agent_probabilities = {agent: prob.item() for agent, prob in zip(self.agents, probs)}
+            print("Agent Probabilities:", agent_probabilities)
 
         else:
             # Get the most common agent in this cluster
@@ -313,7 +313,7 @@ class StreamRouter:
             agent_probabilities = {agent: count/total_samples for agent, count in agent_counts.items()}
             print("Agent Probabilities:", agent_probabilities)
         
-        return predicted_agent
+        return predicted_agent, agent_probabilities
     
     def debug_clusters(self):
         """
