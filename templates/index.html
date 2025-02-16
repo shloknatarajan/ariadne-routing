@@ -322,25 +322,56 @@
           showTypingIndicator();
           
           try {
-            const response = await fetch('/chat', {  // Using relative URL
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ message: message })
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
             });
             
             if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            const data = await response.json();
-            hideTypingIndicator();
-            addMessage(data.response);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                
+                const text = decoder.decode(value);
+                const messages = text.split('\n').filter(msg => msg.trim());
+                
+                for (const msg of messages) {
+                    try {
+                        const data = JSON.parse(msg);
+                        switch (data.type) {
+                            case 'prediction':
+                                addMessage(`Routing to ${data.content}...`, false);
+                                break;
+                            case 'status':
+                                addMessage(data.content, false);
+                                break;
+                            case 'result':
+                                hideTypingIndicator();
+                                addMessage(data.content, false);
+                                break;
+                            case 'error':
+                                hideTypingIndicator();
+                                addMessage(`Error: ${data.content}`, false);
+                                break;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing message:', e);
+                    }
+                }
+            }
           } catch (error) {
             console.error('Error:', error);
             hideTypingIndicator();
-            addMessage('Sorry, there was an error processing your message.');
+            addMessage(`Sorry, there was an error processing your message. ${error}`, false);
           }
         }
       }

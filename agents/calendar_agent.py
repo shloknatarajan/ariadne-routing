@@ -63,5 +63,3 @@ def prompt_calendar(prompt):
 
     result = my_crew.kickoff()
     return result 
-
-print(prompt_calendar("You are trying to hire agupta42@stanford.edu. Schedule an interview with him for 2/18 at 12pm PST via google meet and write a good message about our company that will make him incentivized to join!"))

@@ -10,6 +10,13 @@
             "request": "launch",
             "module": "spreadsheet_agent.spreadsheet_reader",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python App",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/app.py",
+            "console": "integratedTerminal"
         }
     ]
 }
