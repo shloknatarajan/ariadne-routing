@@ -7,7 +7,6 @@ from datetime import datetime
 
 class QuestionInput(BaseModel):
     question: str = Field(..., description="The question to ask about the CSV data")
-    context_window: Optional[int] = Field(default=1000, description="Number of characters to include in context")
     model: Optional[str] = Field(default="gpt-3.5-turbo", description="Model to use for completion"),
     csv_path: Optional[str] = Field(default="weekly-financials.csv", description="Path to the CSV file")
 
@@ -21,7 +20,7 @@ def read_csv_data(file_path: str) -> pd.DataFrame:
     except Exception as e:
         raise Exception(f"Error reading CSV file: {str(e)}")
 
-def prepare_context(df: pd.DataFrame, file_name: str, context_window: int) -> str:
+def prepare_context(df: pd.DataFrame, file_name: str) -> str:
     """
     Prepare context from DataFrame for the LLM
     """
@@ -31,10 +30,8 @@ def prepare_context(df: pd.DataFrame, file_name: str, context_window: int) -> st
     context += f"Number of rows: {len(df)}\n"
     context += "Sample data:\n"
     
-    # Add sample data (first few rows)
-    sample_data = df.head(3).to_string()
-    if len(sample_data) > context_window:
-        sample_data = sample_data[:context_window] + "..."
+    # Add sample data all rows
+    sample_data = df.to_string()
     
     context += sample_data
     return context
@@ -50,7 +47,7 @@ def answer_question(question_input: QuestionInput) -> str:
     file_name = question_input.csv_path.split("/")[-1]
     
     # Prepare context
-    context = prepare_context(df, file_name, question_input.context_window)
+    context = prepare_context(df, file_name)
     
     # Construct prompt
     prompt = f"""Given the following CSV data:
@@ -81,8 +78,7 @@ def main():
     # Define question using Pydantic model
     question = QuestionInput(
         question="What was the highest revenue week?",
-        context_window=1500,
-        model="gpt-3.5-turbo",
+        model="claude-3-5-sonnet-20240620",
         csv_path="spreadsheet_agent/weekly-financials.csv"
     )
     
