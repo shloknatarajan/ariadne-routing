@@ -33,31 +33,40 @@ def chat():
         predicted_agent = new_router.inference(message)
         
         def generate():
-            # Each response needs to be properly formatted and end with a newline
-            yield json.dumps({
-                "type": "prediction",
-                "content": f"The agent to use is {predicted_agent}"
-            }).strip() + '\n'
-            
-            yield json.dumps({
-                "type": "status",
-                "content": f"Running {predicted_agent} agent..."
-            }).strip() + '\n'
-            
-            # Run the agent
-            result = run_agent(predicted_agent, message)
-            
-            # Final response - result
-            if len(result.raw) < 100:
+            try:
+                # First message - prediction
                 yield json.dumps({
-                    "type": "result",
-                    "content": result.raw
-                }).strip() + '\n'
-            else:
+                    "type": "prediction",
+                    "content": str(predicted_agent)  # Ensure it's a string
+                }, ensure_ascii=False).strip() + '\n'
+                
+                # Status message
                 yield json.dumps({
-                    "type": "result",
-                    "content": "agent is done running."
-                }).strip() + '\n'
+                    "type": "status",
+                    "content": f"Running {str(predicted_agent)} agent..."
+                }, ensure_ascii=False).strip() + '\n'
+                
+                # Run the agent
+                result = run_agent(predicted_agent, message)
+                
+                # Ensure result is JSON-safe
+                try:
+                    result_content = str(result.raw) if len(str(result.raw)) < 100 else "agent is done running."
+                    yield json.dumps({
+                        "type": "result",
+                        "content": result_content
+                    }, ensure_ascii=False).strip() + '\n'
+                except Exception as e:
+                    yield json.dumps({
+                        "type": "error",
+                        "content": f"Error processing result: {str(e)}"
+                    }, ensure_ascii=False).strip() + '\n'
+                    
+            except Exception as e:
+                yield json.dumps({
+                    "type": "error",
+                    "content": f"Stream error: {str(e)}"
+                }, ensure_ascii=False).strip() + '\n'
 
         return Response(generate(), mimetype='application/x-ndjson')
     except Exception as e:
