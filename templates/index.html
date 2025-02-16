@@ -237,7 +237,7 @@
       <div class="bot-avatar">
         <svg class="bot-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 2C8.13 2 5 5.13 5 9v7.5c0 1.38 1.12 2.5 2.5 2.5H11v-2H7.5v-8c0-2.48 2.02-4.5 4.5-4.5s4.5 2.02 4.5 4.5v8H13v2h3.5c1.38 0 2.5-1.12 2.5-2.5V9c0-3.87-3.13-7-7-7z" fill="#1a1a1a"/>
-          <path d="M14 15.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-6 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" fill="#1a1a1a"/>
+          <path d="M14 15.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" fill="#1a1a1a"/>
           <path d="M17 2v3h2V2h-2zm-3 0v3h2V2h-2zm-3 0v3h2V2h-2zm-3 0v3h2V2H8z" fill="#1a1a1a"/>
         </svg>
       </div>
@@ -322,13 +322,17 @@
           showTypingIndicator();
           
           try {
-            const response = await fetch('http://localhost:5000/chat', {
+            const response = await fetch('/chat', {  // Using relative URL
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({ message: message })
             });
+            
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
             
             const data = await response.json();
             hideTypingIndicator();
