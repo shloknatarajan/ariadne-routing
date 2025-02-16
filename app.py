@@ -51,9 +51,10 @@ def chat():
                 
                 # Ensure result is JSON-safe
                 try:
-                    result_content = str(result.raw) if len(str(result.raw)) < 100 else "agent is done running."
+                    # Wait for the agent to finish running
+                    result_content = str(result.raw)
                     yield json.dumps({
-                        "type": "result",
+                        "type": "result",  
                         "content": result_content
                     }, ensure_ascii=False).strip() + '\n'
                 except Exception as e:
