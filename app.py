@@ -12,13 +12,13 @@ def home():
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
-        print('hi')
+        print('starting stream_router')
         from stream_router import StreamRouter
         import pickle
         data = request.get_json()
         message = data.get('message', '')
         # Load the state and create a new router
-        print('hello')
+        print('message received')
         with open('router_state.pkl', 'rb') as f:
             state = pickle.load(f)
             
