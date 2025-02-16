@@ -62,4 +62,6 @@ def prompt_calendar(prompt):
     my_crew = Crew(agents=[crewai_agent, knowledge_agent], tasks=[task], verbose=True)
 
     result = my_crew.kickoff()
-    print(result)
+    return result 
+
+print(prompt_calendar("Make a gcal meeting with advayg@mit.edu. Send a google meet. Schedule for 2/18 at 1pm PST."))
