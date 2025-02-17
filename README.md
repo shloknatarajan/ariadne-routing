@@ -13,5 +13,7 @@ To get started, run `python app.py`
 1. Take a set of queries
 2. Convert the queries into a vector using the same pre-trained embedding model
 3. For each set of similar queries, convert the cluster into a single embedding vector
-4. Return the query that is most representative of the cluster or the cluster embedding vector
+4. Return cluster embedding vector
+5. Map cluster embedding vector to agent space
+6. Map to agent embedding
 
