@@ -3,3 +3,5 @@
 cache
 .venv
 **/.DS_Store
+cache/*
+.composio.lock

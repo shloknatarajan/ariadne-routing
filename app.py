@@ -19,7 +19,7 @@ def chat():
         message = data.get('message', '')
         # Load the state and create a new router
         print('message received')
-        with open('router_state.pkl', 'rb') as f:
+        with open('router_states/router_state_12.pkl', 'rb') as f:
             state = pickle.load(f)
             
         new_router = StreamRouter(
