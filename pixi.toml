@@ -1,0 +1,25 @@
+[project]
+authors = ["shloknatarajan <shlok.natarajan@gmail.com>"]
+channels = ["conda-forge", "pypi"]
+name = "ariadne-routing"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+python = ">=3.11.11,<3.12"
+flask = ">=3.1.0,<4"
+numpy = ">=1.0.0,<2.0.0"
+pandas = ">=2.2.3,<3"
+matplotlib = ">=3.10.1,<4"
+langchain = ">=0.3.24,<0.4"
+flask_cors = ">=4.0.0,<5"
+
+[pypi-dependencies]
+sentence-transformers = ">=3.4.1, <4"
+crewai = ">=0.117.1, <0.118"
+langchain-iris = ">=0.2.1, <0.3"
+
+
+
